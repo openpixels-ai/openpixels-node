@@ -1,0 +1,35 @@
+{
+  "name": "openpixels",
+  "version": "0.1.0",
+  "description": "OpenPixels TypeScript/JavaScript SDK",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "tsx test.ts",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "openpixels",
+    "ai",
+    "image generation"
+  ],
+  "author": "OpenPixels",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.11.28",
+    "dotenv": "^16.4.5",
+    "tsup": "^8.0.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "cross-fetch": "^4.1.0",
+    "lodash": "^4.17.21"
+  }
+}
