@@ -1,1 +1,1 @@
-export { AsyncOpenPixels, OpenPixels } from './client';
+export { OpenPixels as AsyncOpenPixels, OpenPixels } from './client';

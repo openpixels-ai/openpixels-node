@@ -50,13 +50,9 @@ const client = new OpenPixels({
 #### Methods
 
 - `run(payload)`: Submits a job and waits for the result.
-- `submit(payload)`: Submits a job and returns the job ID.
-- `subscribe(jobId)`: Subscribes to updates for a job.
-- `close()`: Closes the client connection.
 
-### `AsyncOpenPixels`
-
-For more advanced usage with async/await and async generators.
+<!-- - `submit(payload)`: Submits a job and returns the job ID.
+- `subscribe(jobId)`: Subscribes to updates for a job. -->
 
 ## License
 

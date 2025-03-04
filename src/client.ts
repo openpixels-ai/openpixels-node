@@ -4,21 +4,15 @@ const BASE_URL = 'https://worker.openpixels.ai';
 
 // Type definitions
 type FluxDevModel = {
-  model: 'blackforestlabs/flux-dev';
-  count?: number;
+  model: 'flux-dev';
   prompt: string;
-  negative_prompt?: string;
-  seed?: number;
   width?: number;
   height?: number;
 };
 
 type FluxSchnellModel = {
-  model: 'blackforestlabs/flux-schnell';
-  count?: number;
+  model: 'flux-schnell';
   prompt: string;
-  negative_prompt?: string;
-  seed?: number;
   width?: number;
   height?: number;
 };
@@ -28,8 +22,12 @@ type InputParams = FluxDevModel | FluxSchnellModel;
 type PollResult = {
   type: string;
   status?: string;
-  data?: any;
-  error?: string;
+  data?: {url: string} | {base64: string};
+  error?: {
+    message: string;
+    type: string; 
+    code?: string
+  };
   meta?: Record<string, any>;
 };
 
@@ -44,7 +42,7 @@ interface ClientOptions {
   baseUrl?: string;
 }
 
-export class AsyncOpenPixels {
+export class OpenPixels {
   private baseUrl: string;
   private apiKey: string;
   private connectedMachineId?: string;
@@ -55,7 +53,7 @@ export class AsyncOpenPixels {
     this.apiKey = options.apiKey;
   }
 
-  private async fetchWithAuth(
+  private async opFetch(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<Response> {
@@ -80,7 +78,7 @@ export class AsyncOpenPixels {
     const startTime = Date.now();
     
     try {
-      const response = await this.fetchWithAuth('/submit', {
+      const response = await this.opFetch('/submit', {
         method: 'POST',
         body: JSON.stringify(input)
       });
@@ -114,7 +112,7 @@ export class AsyncOpenPixels {
         const timeoutId = setTimeout(() => controller.abort(), 30000);
         
         try {
-          const response = await this.fetchWithAuth(`/poll/${jobId}`, {
+          const response = await this.opFetch(`/poll/${jobId}`, {
             signal: controller.signal
           });
           
@@ -171,32 +169,4 @@ export class AsyncOpenPixels {
     
     throw new Error('Unexpected end of subscription without result');
   }
-
-  async close(): Promise<void> {
-    // Nothing to do for fetch
-  }
 }
-
-export class OpenPixels {
-  private asyncClient: AsyncOpenPixels;
-
-  constructor(options: ClientOptions) {
-    this.asyncClient = new AsyncOpenPixels(options);
-  }
-
-  async submit(payload: InputParams): Promise<string> {
-    return this.asyncClient.submit(payload);
-  }
-
-  async *subscribe(jobId: string): AsyncGenerator<PollResult, void, unknown> {
-    yield* this.asyncClient.subscribe(jobId);
-  }
-
-  async run(payload: InputParams): Promise<Record<string, any>> {
-    return this.asyncClient.run(payload);
-  }
-
-  async close(): Promise<void> {
-    await this.asyncClient.close();
-  }
-} 
