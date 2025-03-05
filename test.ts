@@ -38,9 +38,7 @@ async function runTest() {
     console.error('Test failed with error:');
     console.error(error);
     process.exit(1);
-  } finally {
-    await client.close();
-  }
+  } 
 }
 
 // Run the test
