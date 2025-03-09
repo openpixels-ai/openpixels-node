@@ -24,7 +24,7 @@ const client = new OpenPixels({
 // Generate an image
 async function generateImage() {
   const result = await client.run({
-    model: 'blackforestlabs/flux-dev',
+    model: 'flux-dev',
     prompt: 'a cat',
   });
   

@@ -13,7 +13,7 @@ if (!API_KEY) {
 const client = new OpenPixels({
   apiKey: API_KEY,
   // Uncomment to use a local or development server
-  // baseUrl: 'http://localhost:1729',
+  baseUrl: 'http://localhost:1729',
 });
 
 async function runTest() {
@@ -23,13 +23,25 @@ async function runTest() {
     console.log('Generating an image with the prompt "a cat"...');
     
     const result = await client.run({
-      model: 'blackforestlabs/flux-dev',
+      // model: 'flux-1.1-pro',
+      model: "flux-dev",
       prompt: 'a cat',
       // Optional parameters
       // count: 1,
       // width: 512,
       // height: 512,
-    });
+      config: {
+        routing: {
+          ordering: ['runware', 'fal']
+          // ordering: ['hyperbolic']
+          // order: [Providers.Runware, Providers.Fal],
+          // fallback: true,
+          // strategy: 'best',
+          // whitelist: [Providers.Runware]
+        }
+      }
+    })
+    
     
     console.log('Image generation result:');
     console.log(JSON.stringify(result, null, 2));
