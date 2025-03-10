@@ -23,27 +23,21 @@ async function runTest() {
     console.log('Generating an image with the prompt "a cat"...');
     
     const result = await client.run({
-      // model: 'flux-1.1-pro',
-      model: "flux-dev",
-      prompt: 'a cat',
-      // Optional parameters
-      // count: 1,
-      // width: 512,
-      // height: 512,
+      // model: "wan-2.1-1.3b",
+      model: "ray-2",
+      prompt: 'a cat runs through a field of flowers',
+      width: 1024,
+      height: 720,
       config: {
         routing: {
-          ordering: ['runware', 'fal']
-          // ordering: ['hyperbolic']
-          // order: [Providers.Runware, Providers.Fal],
-          // fallback: true,
-          // strategy: 'best',
-          // whitelist: [Providers.Runware]
+          // ordering: ['runware', 'fal']
+          ordering: ['luma']
         }
       }
     })
     
     
-    console.log('Image generation result:');
+    console.log('result:');
     console.log(JSON.stringify(result, null, 2));
     console.log('\nTest completed successfully!');
   } catch (error) {

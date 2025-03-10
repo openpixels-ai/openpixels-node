@@ -4,7 +4,7 @@ const BASE_URL = 'https://worker.openpixels.ai';
 
 // Type definitions
 type FluxModel = {
-  model: 'flux-dev' | 'flux-schnell' | 'flux-1.1-pro';
+  model: 'flux-dev' | 'flux-schnell' | 'flux-1.1-pro' | 'ray-2' | 'wan-2.1-1.3b' | 'wan-2.1-14b';
   prompt: string;
   width?: number;
   height?: number;
@@ -134,14 +134,14 @@ export class OpenPixels {
 
   async run(payload: InputParams): Promise<{id: string, status: string, data?: PolledResult['data'], error?: PolledResult['error']}> {
     const result = await this.submit(payload);
-    console.log("Received result in js client", result)
+    console.log("Received result in js client", JSON.stringify(result, null, 2))
 
     if (result.type === 'result') {
       return cleanResult(result);
     }
     
     for await (const results of this.subscribe(result.id)) {
-      console.log("Received results in js client", results)
+      console.log("Received results in js client", JSON.stringify(results, null, 2))
       if (results.type === 'result') {
         return cleanResult(results);
       }
