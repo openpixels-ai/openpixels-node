@@ -4,7 +4,7 @@ const BASE_URL = 'https://worker.openpixels.ai';
 
 // Type definitions
 type FluxModel = {
-  model: 'flux-dev' | 'flux-schnell' | 'flux-1.1-pro' | 'ray-2' | 'wan-2.1-1.3b' | 'wan-2.1-14b';
+  model: 'flux-dev' | 'flux-schnell' | 'flux-1.1-pro' | 'ray-2' | 'wan-2.1-1.3b' | 'wan-2.1-14b' | 'photon-flash-1' | 'photon-1' | 'veo-2'
   prompt: string;
   width?: number;
   height?: number;
@@ -51,7 +51,6 @@ interface ClientOptions {
 export class OpenPixels {
   private baseUrl: string;
   private apiKey: string;
-  private connectedMachineId?: string //= "dne_id"
 
   constructor(options: ClientOptions) {
     this.baseUrl = options.baseUrl || BASE_URL;
@@ -68,10 +67,6 @@ export class OpenPixels {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string> || {})
     };
-
-    if (this.connectedMachineId) {
-      headers['fly-force-instance-id'] = this.connectedMachineId;
-    }
 
     return fetch(url, {
       ...options,
@@ -90,15 +85,11 @@ export class OpenPixels {
         throw new Error(`Failed to submit job: ${response.statusText}. ${await response.text()}`);
       }
       
-      if (!this.connectedMachineId) {
-        this.connectedMachineId = response.headers.get('machine-id') || undefined;
-      }
-
       return (await response.json() as PolledResponse);
   }
 
   async *subscribe(jobId: string): AsyncGenerator<PolledResponse, void, unknown> {
-    console.log("Subscribing to job", jobId)
+    // console.log("Subscribing to job", jobId)
     while (true) {
       try {
         const controller = new AbortController();
@@ -124,7 +115,7 @@ export class OpenPixels {
         }
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
-          console.log(`Job ${jobId} timed out; continuing to poll.`);
+          // console.log(`Job ${jobId} timed out; continuing to poll.`);
           continue;
         }
         throw error;
@@ -134,20 +125,19 @@ export class OpenPixels {
 
   async run(payload: InputParams): Promise<{id: string, status: string, data?: PolledResult['data'], error?: PolledResult['error']}> {
     const result = await this.submit(payload);
-    console.log("Received result in js client", JSON.stringify(result, null, 2))
+    // console.log("Received result in js client", JSON.stringify(result, null, 2))
 
     if (result.type === 'result') {
       return cleanResult(result);
     }
     
     for await (const results of this.subscribe(result.id)) {
-      console.log("Received results in js client", JSON.stringify(results, null, 2))
+      // console.log("Received results in js client", JSON.stringify(results, null, 2))
       if (results.type === 'result') {
         return cleanResult(results);
       }
     }
     
-    console.log('hi there')
     throw new Error('Unexpected end of subscription without result');
   }
 }
