@@ -54,6 +54,11 @@ const client = new OpenPixels({
 <!-- - `submit(payload)`: Submits a job and returns the job ID.
 - `subscribe(jobId)`: Subscribes to updates for a job. -->
 
+### Publish a New Version
+1. Bump the version in the `package.json` file
+2. `pnpm build`
+3. `pnpm publish`
+
 ## License
 
 MIT # openpixels-node
