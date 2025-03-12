@@ -2,9 +2,8 @@ import fetch from 'cross-fetch';
 
 const BASE_URL = 'https://worker.openpixels.ai';
 
-// Type definitions
 type FluxModel = {
-  model: 'flux-dev' | 'flux-schnell' | 'flux-1.1-pro' | 'ray-2' | 'wan-2.1-1.3b' | 'wan-2.1-14b' | 'photon-flash-1' | 'photon-1' | 'veo-2'
+  model: 'flux-dev' | 'flux-schnell' | 'flux-1.1-pro' // | 'ray-2' | 'wan-2.1-1.3b' | 'wan-2.1-14b' | 'photon-flash-1' | 'photon-1' | 'veo-2'
   prompt: string;
   width?: number;
   height?: number;
@@ -59,7 +58,8 @@ export class OpenPixels {
 
   private async opFetch(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeout?: number
   ): Promise<Response> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
@@ -68,10 +68,37 @@ export class OpenPixels {
       ...(options.headers as Record<string, string> || {})
     };
 
-    return fetch(url, {
-      ...options,
-      headers
-    });
+    // Setup timeout logic if timeout is provided
+    let controller: AbortController | undefined;
+    let timeoutId: NodeJS.Timeout | undefined;
+    
+    if (timeout) {
+      controller = new AbortController();
+      const signal = controller.signal;
+      
+      // If options already has a signal, we can't override it
+      if (options.signal) {
+        throw new Error('Cannot set a timeout when the options already contain a signal');
+      }
+      
+      timeoutId = setTimeout(() => {
+        if (controller) {
+          controller.abort();
+        }
+      }, timeout);
+      options.signal = signal;
+    }
+
+    try {
+      return await fetch(url, {
+        ...options,
+        headers
+      });
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
   }
 
   async submit(input: InputParams): Promise<PolledResponse> {
@@ -92,27 +119,15 @@ export class OpenPixels {
     // console.log("Subscribing to job", jobId)
     while (true) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-        
-        try {
-          const response = await this.opFetch(`/v2/poll/${jobId}`, {
-            signal: controller.signal
-          });
+        const response = await this.opFetch(`/v2/poll/${jobId}`, {}, 30000);
 
-          if (!response.ok) {
-            throw new Error(`Failed to poll job: ${response.statusText}. ${await response.text()}`);
-          }
-          
-          const data = await response.json() as PolledResponse;
-          yield data;
-          
-          if (data.type === 'result') {
-            break;
-          }
-        } finally {
-          clearTimeout(timeoutId);
-        }
+        if (!response.ok) throw new Error(`Failed to poll job: ${response.statusText}. ${await response.text()}`);
+        
+        const data = await response.json() as PolledResponse;
+        yield data;
+        
+        if (data.type === 'result') break;
+
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
           // console.log(`Job ${jobId} timed out; continuing to poll.`);

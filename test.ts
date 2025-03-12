@@ -27,10 +27,10 @@ async function runTest() {
     
     const result = await client.run({
       // model: "wan-2.1-1.3b",
-      model: "ray-2",
+      // model: "ray-2",
       // model: "ray-2",
       // model: "veo-2",
-      // model: "flux-1.1-pro",
+      model: "flux-1.1-pro",
       // model: "flux-dev",
       // model: "veo-2",
       prompt: 'a cat runs through a field of flowers',
