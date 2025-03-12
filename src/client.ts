@@ -105,7 +105,7 @@ export class OpenPixels {
       const response = await this.opFetch('/v2/submit', {
         method: 'POST',
         body: JSON.stringify(input)
-      });
+      }, 90 * 1000);
       
       if (!response.ok) {
         console.log(await response.status)
@@ -119,7 +119,7 @@ export class OpenPixels {
     // console.log("Subscribing to job", jobId)
     while (true) {
       try {
-        const response = await this.opFetch(`/v2/poll/${jobId}`, {}, 30000);
+        const response = await this.opFetch(`/v2/poll/${jobId}`, {}, 90 * 1000);
 
         if (!response.ok) throw new Error(`Failed to poll job: ${response.statusText}. ${await response.text()}`);
         
