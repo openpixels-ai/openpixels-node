@@ -56,8 +56,10 @@ const client = new OpenPixels({
 
 ### Publish a New Version
 1. Bump the version in the `package.json` file
-2. `pnpm build`
-3. `pnpm publish`
+2. `git tag vX.Y.Z`
+3. `git push origin vX.Y.Z`
+4. `pnpm build`
+5. `pnpm publish`
 
 ## License
 
