@@ -101,7 +101,7 @@ export class OpenPixels {
     }
   }
 
-  async submit(input: InputParams): Promise<PolledResponse> {
+  private async submit(input: InputParams): Promise<PolledResponse> {
       const response = await this.opFetch('/v2/submit', {
         method: 'POST',
         body: JSON.stringify(input)
@@ -115,7 +115,7 @@ export class OpenPixels {
       return (await response.json() as PolledResponse);
   }
 
-  async *subscribe(jobId: string): AsyncGenerator<PolledResponse, void, unknown> {
+  private async *subscribe(jobId: string): AsyncGenerator<PolledResponse, void, unknown> {
     // console.log("Subscribing to job", jobId)
     while (true) {
       try {
